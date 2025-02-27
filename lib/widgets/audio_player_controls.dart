@@ -18,7 +18,6 @@ class AudioPlayerControls extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final audioService = ref.watch(audioServiceProvider);
-    final currentSong = ref.watch(currentSongProvider);
     final playbackState = ref.watch(playbackStateProvider);
     final duration = ref.watch(durationProvider);
     final position = ref.watch(positionProvider);
@@ -33,20 +32,28 @@ class AudioPlayerControls extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding),
           child: position.when(
             data: (pos) => duration.when(
-              data: (dur) => ProgressBar(
-                progress: pos,
-                total: dur ?? Duration.zero,
-                buffered: buffering.maybeWhen(
-                  data: (isBuffering) => isBuffering ? Duration.zero : dur ?? Duration.zero,
-                  orElse: () => dur ?? Duration.zero,
-                ),
-                onSeek: (duration) {
-                  audioService.seek(duration);
-                },
-                thumbRadius: 8.0,
-                timeLabelTextStyle: Theme.of(context).textTheme.bodySmall,
-                timeLabelPadding: 8.0,
-              ),
+              data: (dur) {
+                if (dur == null || buffering.maybeWhen(
+                  data: (isBuffering) => isBuffering,
+                  orElse: () => false,
+                )) {
+                  return const LinearProgressIndicator();
+                }
+                return ProgressBar(
+                  progress: pos,
+                  total: dur,
+                  buffered: buffering.maybeWhen(
+                    data: (isBuffering) => isBuffering ? dur : dur,
+                    orElse: () => dur,
+                  ),
+                  onSeek: (duration) {
+                    audioService.seek(duration);
+                  },
+                  thumbRadius: 8.0,
+                  timeLabelTextStyle: Theme.of(context).textTheme.bodySmall,
+                  timeLabelPadding: 8.0,
+                );
+              },
               loading: () => const LinearProgressIndicator(),
               error: (_, __) => const SizedBox(),
             ),
@@ -83,43 +90,42 @@ class AudioPlayerControls extends ConsumerWidget {
             
             // Play/pause button
             Container(
+              width: showFullControls ? 80 : 64,
+              height: showFullControls ? 80 : 64,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,
                 shape: BoxShape.circle,
               ),
-              child: playbackState.when(
-                data: (state) {
-                  final isPlaying = state.playing;
-                  final isBuffering = state.processingState == ProcessingState.buffering;
-                  
-                  if (isBuffering) {
-                    return const Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: SizedBox(
+              child: Center(
+                child: playbackState.when(
+                  data: (state) {
+                    final isPlaying = state.playing;
+                    final isBuffering = state.processingState == ProcessingState.buffering;
+                    
+                    if (isBuffering) {
+                      return const SizedBox(
                         width: 32,
                         height: 32,
                         child: CircularProgressIndicator(
                           color: Colors.white,
                           strokeWidth: 3,
                         ),
+                      );
+                    }
+                    
+                    return IconButton(
+                      icon: Icon(
+                        isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                        color: Colors.white,
                       ),
+                      iconSize: showFullControls ? 56.0 : 40.0,
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        audioService.togglePlayPause();
+                      },
                     );
-                  }
-                  
-                  return IconButton(
-                    icon: Icon(
-                      isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                      color: Colors.white,
-                    ),
-                    iconSize: showFullControls ? 56.0 : 40.0,
-                    onPressed: () {
-                      audioService.togglePlayPause();
-                    },
-                  );
-                },
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: SizedBox(
+                  },
+                  loading: () => const SizedBox(
                     width: 32,
                     height: 32,
                     child: CircularProgressIndicator(
@@ -127,16 +133,17 @@ class AudioPlayerControls extends ConsumerWidget {
                       strokeWidth: 3,
                     ),
                   ),
-                ),
-                error: (_, __) => IconButton(
-                  icon: const Icon(
-                    Icons.play_arrow_rounded,
-                    color: Colors.white,
+                  error: (_, __) => IconButton(
+                    icon: const Icon(
+                      Icons.play_arrow_rounded,
+                      color: Colors.white,
+                    ),
+                    iconSize: showFullControls ? 56.0 : 40.0,
+                    padding: EdgeInsets.zero,
+                    onPressed: () {
+                      audioService.togglePlayPause();
+                    },
                   ),
-                  iconSize: showFullControls ? 56.0 : 40.0,
-                  onPressed: () {
-                    audioService.togglePlayPause();
-                  },
                 ),
               ),
             ),

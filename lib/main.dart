@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'screens/home_screen.dart';
+import 'screens/loading_screen.dart';
 import 'providers/audio_provider.dart';
 import 'models/song.dart';
 import 'providers/song_provider.dart';
@@ -54,7 +54,7 @@ class TrebleApp extends StatelessWidget {
           centerTitle: false,
         ),
       ),
-      home: const TrebleScaffold(child: HomeScreen()),
+      home: const LoadingScreen(),
     );
   }
 }

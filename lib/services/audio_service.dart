@@ -148,15 +148,30 @@ class AudioService {
       
       final audioSource = ConcatenatingAudioSource(children: audioSources);
       await _audioPlayer.setAudioSource(audioSource, initialIndex: _currentIndex);
+      
+      // Wait a short moment to ensure duration is available
+      await Future.delayed(const Duration(milliseconds: 100));
+      final duration = await _audioPlayer.duration;
+      if (duration != null) {
+        _durationController.add(duration);
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Error setting audio source: $e');
       }
+      _durationController.add(null);
     }
   }
 
   // Play the current song
   Future<void> play() async {
+    // Ensure we have a valid duration before playing
+    if (_audioPlayer.duration == null) {
+      final duration = await _audioPlayer.duration;
+      if (duration != null) {
+        _durationController.add(duration);
+      }
+    }
     await _audioPlayer.play();
     _saveLastPlayedSong();
   }
@@ -206,6 +221,12 @@ class AudioService {
     _currentIndex = index;
     await _audioPlayer.seek(Duration.zero, index: index);
     _currentSongController.add(currentSong);
+    
+    // Ensure duration is updated when switching songs
+    final duration = await _audioPlayer.duration;
+    if (duration != null) {
+      _durationController.add(duration);
+    }
     
     if (_audioPlayer.playing) {
       await play();
