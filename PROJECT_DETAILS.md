@@ -39,7 +39,6 @@ lib/
 ## Dependencies to Install
 This is not a fixed list. Please adjust to make it more modern if there are better or industry-standard alternatives:
 - just_audio → Handles FLAC streaming.
-- audiotagger → Extracts metadata (title, artist, album, cover).
 - Dio → Fetches file list from Cloudflare R2.
 - shared_preferences → Stores last played song.
 - riverpod / provider → State management.
@@ -55,10 +54,3 @@ This is not a fixed list. Please adjust to make it more modern if there are bett
 - For Web: Deploy to Vercel
 - For Mobile: Generate APK (flutter build apk).
 - Domain Setup: Point domain to Vercel.
-
-## What to do on first setup
-1. Initialize Flutter Project
-2. Set up project structure & install dependencies.
-3. Implement song list & metadata extraction.
-4. Build UI screens (Home, Player, Album view).
-5. Deploy Web version to Vercel.
