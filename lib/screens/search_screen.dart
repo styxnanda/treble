@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/song_provider.dart';
 import '../providers/audio_provider.dart';
 import '../widgets/song_tile.dart';
+import '../main.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -46,51 +47,53 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       selection: TextSelection.collapsed(offset: searchQuery.length),
     );
     
-    return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          controller: _searchController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Search songs, artists, albums...',
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-          ),
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        actions: [
-          if (_searchController.text.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                _searchController.clear();
-                ref.read(searchQueryProvider.notifier).state = '';
-              },
+    return TrebleScaffold(
+      child: Scaffold(
+        appBar: AppBar(
+          title: TextField(
+            controller: _searchController,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'Search songs, artists, albums...',
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
             ),
-        ],
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          actions: [
+            if (_searchController.text.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  _searchController.clear();
+                  ref.read(searchQueryProvider.notifier).state = '';
+                },
+              ),
+          ],
+        ),
+        body: searchQuery.isEmpty
+            ? const Center(
+                child: Text('Type to search...'),
+              )
+            : searchResults.isEmpty
+                ? const Center(
+                    child: Text('No results found'),
+                  )
+                : ListView.builder(
+                    itemCount: searchResults.length,
+                    itemBuilder: (context, index) {
+                      final song = searchResults[index];
+                      return SongTile(
+                        song: song,
+                        onTap: () {
+                          ref.read(playSongProvider(
+                            PlayRequest(song: song)
+                          ));
+                        },
+                      );
+                    },
+                  ),
       ),
-      body: searchQuery.isEmpty
-          ? const Center(
-              child: Text('Type to search...'),
-            )
-          : searchResults.isEmpty
-              ? const Center(
-                  child: Text('No results found'),
-                )
-              : ListView.builder(
-                  itemCount: searchResults.length,
-                  itemBuilder: (context, index) {
-                    final song = searchResults[index];
-                    return SongTile(
-                      song: song,
-                      onTap: () {
-                        ref.read(playSongProvider(
-                          PlayRequest(song: song)
-                        ));
-                      },
-                    );
-                  },
-                ),
     );
   }
 }

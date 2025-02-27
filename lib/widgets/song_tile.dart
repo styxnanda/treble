@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/song.dart';
 import '../providers/audio_provider.dart';
+import '../providers/song_provider.dart';
+import '../screens/album_screen.dart';
+import '../screens/artist_screen.dart';
 
 class SongTile extends ConsumerWidget {
   final Song song;
@@ -32,7 +35,7 @@ class SongTile extends ConsumerWidget {
     );
     
     return ListTile(
-      leading: _buildLeading(context, isCurrentSong, isPlaying),
+      leading: _buildLeading(context, ref, isCurrentSong, isPlaying),
       title: Text(
         song.title,
         maxLines: 1,
@@ -58,8 +61,9 @@ class SongTile extends ConsumerWidget {
     );
   }
   
-  Widget _buildLeading(BuildContext context, bool isCurrentSong, bool isPlaying) {
-    // Since we don't have coverUrl in the new model, we'll just use a music note icon
+  Widget _buildLeading(BuildContext context, WidgetRef ref, bool isCurrentSong, bool isPlaying) {
+    final albumCoverUrl = ref.watch(albumCoverUrlProvider(song.album));
+    
     return Container(
       width: 50,
       height: 50,
@@ -67,9 +71,36 @@ class SongTile extends ConsumerWidget {
         color: Colors.grey[800],
         borderRadius: BorderRadius.circular(4.0),
       ),
-      child: Icon(
-        Icons.music_note,
-        color: isCurrentSong ? Theme.of(context).colorScheme.primary : Colors.white54,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4.0),
+        child: albumCoverUrl.when(
+          data: (url) => url.isEmpty
+            ? Icon(
+                Icons.music_note,
+                color: isCurrentSong ? Theme.of(context).colorScheme.primary : Colors.white54,
+              )
+            : url.startsWith('http')
+              ? Image.network(
+                  url,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.music_note,
+                    color: isCurrentSong ? Theme.of(context).colorScheme.primary : Colors.white54,
+                  ),
+                )
+              : Image.asset(url, fit: BoxFit.cover),
+          loading: () => const Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+          error: (_, __) => Icon(
+            Icons.music_note,
+            color: isCurrentSong ? Theme.of(context).colorScheme.primary : Colors.white54,
+          ),
+        ),
       ),
     );
   }
@@ -95,20 +126,21 @@ class SongTile extends ConsumerWidget {
                 break;
                 
               case 'view_album':
-                // Navigate to album screen
-                Navigator.pushNamed(
+                // Navigate to album screen using original album name from song
+                Navigator.push(
                   context,
-                  '/album',
-                  arguments: song.album,
+                  MaterialPageRoute(
+                    builder: (_) => AlbumScreen(albumName: song.album),
+                  ),
                 );
                 break;
                 
               case 'view_artist':
-                // Navigate to artist screen
-                Navigator.pushNamed(
+                Navigator.push(
                   context,
-                  '/artist',
-                  arguments: song.artist,
+                  MaterialPageRoute(
+                    builder: (_) => ArtistScreen(artistName: song.artist),
+                  ),
                 );
                 break;
             }

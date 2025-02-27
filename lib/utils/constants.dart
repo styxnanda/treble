@@ -7,8 +7,8 @@ class AppConstants {
   static const double cardBorderRadius = 12.0;
   
   // Audio player settings
-  static const int seekForwardSeconds = 15;
-  static const int seekBackwardSeconds = 15;
+  static const int seekForwardSeconds = 10;
+  static const int seekBackwardSeconds = 10;
   
   // Local storage keys
   static const String lastPlayedSongKey = 'last_played_song';

@@ -4,11 +4,15 @@ class Artist {
   final String name;
   final List<String> albums;
   final List<Song> songs;
+  final String biography;
+  final String imagePath;
 
   Artist({
     required this.name,
     required this.albums,
     required this.songs,
+    this.biography = '',
+    this.imagePath = '',
   });
 
   factory Artist.fromJson(Map<String, dynamic> json) {
@@ -18,6 +22,8 @@ class Artist {
       songs: (json['songs'] as List<dynamic>?)
           ?.map((songJson) => Song.fromJson(songJson))
           .toList() ?? [],
+      biography: json['biography'] ?? '',
+      imagePath: json['imagePath'] ?? '',
     );
   }
 
@@ -26,6 +32,8 @@ class Artist {
       'name': name,
       'albums': albums,
       'songs': songs.map((song) => song.toJson()).toList(),
+      'biography': biography,
+      'imagePath': imagePath,
     };
   }
 

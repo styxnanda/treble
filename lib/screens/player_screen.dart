@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/audio_provider.dart';
+import '../providers/song_provider.dart';
 import '../widgets/audio_player_controls.dart';
 
 class PlayerScreen extends ConsumerWidget {
@@ -10,7 +11,6 @@ class PlayerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentSong = ref.watch(currentSongProvider);
-    final playbackState = ref.watch(playbackStateProvider);
     
     return Scaffold(
       appBar: AppBar(
@@ -29,6 +29,8 @@ class PlayerScreen extends ConsumerWidget {
             return const Center(child: Text('No song is currently playing'));
           }
           
+          final albumCoverUrl = ref.watch(albumCoverUrlProvider(song.album));
+          
           return Column(
             children: [
               // Expanded album art and song info
@@ -39,25 +41,49 @@ class PlayerScreen extends ConsumerWidget {
                     children: [
                       const SizedBox(height: 40),
                       
-                      // Music note icon since we don't have album art
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: MediaQuery.of(context).size.width * 0.8,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                          color: Colors.grey[800],
+                      // Album art container
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: 400, // Maximum width for desktop screens
+                          maxHeight: 400, // Maximum height to match width
                         ),
-                        clipBehavior: Clip.antiAlias,
-                        child: const Center(
-                          child: Icon(Icons.music_note, size: 80, color: Colors.white54),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.width * 0.8,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                spreadRadius: 2,
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                            color: Colors.grey[800],
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: albumCoverUrl.when(
+                            data: (url) => url.isEmpty
+                              ? const Center(
+                                  child: Icon(Icons.music_note, size: 80, color: Colors.white54),
+                                )
+                              : url.startsWith('http')
+                                ? Image.network(
+                                    url,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => const Center(
+                                      child: Icon(Icons.music_note, size: 80, color: Colors.white54),
+                                    ),
+                                  )
+                                : Image.asset(url, fit: BoxFit.cover),
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            error: (_, __) => const Center(
+                              child: Icon(Icons.music_note, size: 80, color: Colors.white54),
+                            ),
+                          ),
                         ),
                       ),
                       

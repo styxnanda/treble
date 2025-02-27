@@ -112,13 +112,18 @@ class MusicApiService {
   
   Future<String?> getSongStreamUrl(String songPath) async {
     try {
-      final response = await _dio.get(
-        '$baseUrl/song',
-        queryParameters: {'path': songPath},
-      );
+      // Encode the path to make it URL-safe
+      final encodedPath = Uri.encodeComponent(songPath);
+      final response = await _dio.get('$baseUrl/song/$encodedPath');
       
       if (response.statusCode == 200) {
-        return response.data as String;
+        // Extract the URL from the response data
+        final responseData = response.data;
+        if (responseData is Map && responseData.containsKey('url')) {
+          return responseData['url'] as String;
+        } else {
+          throw Exception('Invalid response format: URL field not found');
+        }
       } else {
         throw Exception('Failed to get song URL: ${response.statusCode}');
       }

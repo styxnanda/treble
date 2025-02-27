@@ -10,6 +10,18 @@ final musicApiServiceProvider = Provider<MusicApiService>((ref) {
   return MusicApiService();
 });
 
+// Provider for the album cover URL for a specific album name
+final albumCoverUrlProvider = FutureProvider.family<String, String>((ref, albumName) async {
+  final albums = await ref.watch(albumsProvider.future);
+  final album = albums.firstWhere(
+    (album) => album.name.toLowerCase() == albumName.toLowerCase(),
+    orElse: () {
+      return Album(name: '', coverUrl: '', songs: []);
+    },
+  );
+  return album.coverUrl.isNotEmpty ? album.coverUrl : 'assets/images/default_cover.png';
+});
+
 // Provider for a list of all songs
 final songsProvider = FutureProvider<List<Song>>((ref) async {
   final apiService = ref.read(musicApiServiceProvider);
@@ -37,16 +49,48 @@ final artistsProvider = FutureProvider<List<Artist>>((ref) async {
   return await apiService.fetchArtists();
 });
 
-// Provider for a specific album by name
+// Add a case-insensitive album provider
 final albumProvider = FutureProvider.family<Album?, String>((ref, albumName) async {
-  final apiService = ref.read(musicApiServiceProvider);
-  return await apiService.fetchAlbumDetails(albumName);
+  final songs = await ref.watch(songsProvider.future);
+  final matchingSongs = songs.where(
+    (song) => song.album.toLowerCase() == albumName.toLowerCase()
+  ).toList();
+  
+  if (matchingSongs.isEmpty) {
+    return null;
+  }
+  
+  final firstSong = matchingSongs.first;
+  final coverUrl = await ref.watch(albumCoverUrlProvider(firstSong.album).future);
+  
+  return Album(
+    name: firstSong.album, // Use the original case from the first song
+    coverUrl: coverUrl,
+    songs: matchingSongs,
+  );
 });
 
 // Provider for a specific artist
 final artistProvider = FutureProvider.family<Artist?, String>((ref, artistName) async {
-  final apiService = ref.read(musicApiServiceProvider);
-  return await apiService.fetchArtistDetails(artistName);
+  // Local artist data
+  final artists = {
+    'Satya Ananda': Artist(
+      name: 'Satya Ananda',
+      albums: [],
+      songs: [],
+      biography: 'Satya Ananda is a musician and software developer with a passion for creating meaningful experiences through code and music.',
+      imagePath: 'assets/images/satya.png',
+    ),
+    'Gene Parade': Artist(
+      name: 'Gene Parade',
+      albums: [],
+      songs: [],
+      biography: 'Gene Parade is the solo project of Satya Ananda, exploring various musical genres and experimental soundscapes.',
+      imagePath: 'assets/images/gene_parade.jpg',
+    ),
+  };
+
+  return Future.value(artists[artistName]);
 });
 
 // Provider for search query

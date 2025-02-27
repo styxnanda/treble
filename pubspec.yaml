@@ -30,4 +30,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/
+    - assets/images/default_cover.png
+    - assets/images/gene_parade.jpg
+    - assets/images/satya.png

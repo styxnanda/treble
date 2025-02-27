@@ -7,6 +7,7 @@ import '../models/song.dart';
 import '../providers/song_provider.dart';
 import '../providers/audio_provider.dart';
 import '../widgets/song_tile.dart';
+import '../main.dart';
 
 class AlbumScreen extends ConsumerWidget {
   final String albumName;
@@ -20,23 +21,25 @@ class AlbumScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final albumAsync = ref.watch(albumProvider(albumName));
 
-    return Scaffold(
-      body: albumAsync.when(
-        data: (album) {
-          if (album == null) {
-            return const Center(child: Text('Album not found'));
-          }
-          
-          return CustomScrollView(
-            slivers: [
-              _buildAppBar(context, ref, album),
-              _buildSongsList(context, ref, album.songs),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Error loading album: $error'),
+    return TrebleScaffold(
+      child: Scaffold(
+        body: albumAsync.when(
+          data: (album) {
+            if (album == null) {
+              return const Center(child: Text('Album not found'));
+            }
+            
+            return CustomScrollView(
+              slivers: [
+                _buildAppBar(context, ref, album),
+                _buildSongsList(context, ref, album.songs),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(
+            child: Text('Error loading album: $error'),
+          ),
         ),
       ),
     );
