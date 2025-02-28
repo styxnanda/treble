@@ -3,139 +3,157 @@
 This document provides detailed information about the music-related endpoints available in the Treble API.
 
 ## List All Songs
-**Endpoint:** `GET /songs`
-**Description:** Retrieves a list of all songs in the system.
+
+**Endpoint:** `GET /api/songs`
+**Description:** Retrieves a list of all songs from the database.
 **Input:** None
-**Output:** Array of Song objects
+**Output:** Array of SongResponse objects
 ```json
 [
   {
-    "id": "album-name/song.flac",
+    "id": 1,
     "title": "Song Title",
-    "artist": "Artist Name",
-    "album": "Album Name",
+    "artistId": 1,
+    "artistName": "Artist Name",
+    "albumId": 1,
+    "albumName": "Album Name",
     "duration": 240.5,
-    "path": "album-name/song.flac"
+    "trackNumber": 1
   }
 ]
 ```
 
 ## List All Albums
-**Endpoint:** `GET /albums`
-**Description:** Retrieves a list of all albums in the system.
+
+**Endpoint:** `GET /api/albums`
+**Description:** Retrieves a lightweight list of all albums with cover URLs.
 **Input:** None
-**Output:** Array of Album objects
+**Output:** Array of AlbumListItem objects
 ```json
 [
   {
+    "id": 1,
     "name": "Album Name",
-    "coverUrl": "https://pre-signed-url-to-cover-image.jpg",
-    "songs": [
-      {
-        "id": "album-name/song.flac",
-        "title": "Song Title",
-        "artist": "Artist Name",
-        "album": "Album Name",
-        "duration": 240.5,
-        "path": "album-name/song.flac"
-      }
-    ]
+    "coverUrl": "https://pre-signed-url-to-cover-image.jpg"
   }
 ]
 ```
 
 ## List All Artists
-**Endpoint:** `GET /artists`
-**Description:** Retrieves a list of all artists in the system.
+
+**Endpoint:** `GET /api/artists`
+**Description:** Retrieves a lightweight list of all artists with profile images.
 **Input:** None
-**Output:** Array of Artist objects
+**Output:** Array of basic Artist objects
 ```json
 [
   {
+    "id": 1,
     "name": "Artist Name",
-    "albums": ["Album Name 1", "Album Name 2"],
-    "songs": [
-      {
-        "id": "album-name/song.flac",
-        "title": "Song Title",
-        "artist": "Artist Name",
-        "album": "Album Name",
-        "duration": 240.5,
-        "path": "album-name/song.flac"
-      }
-    ]
+    "imageUrl": "https://pre-signed-url-to-artist-image.jpg"
   }
 ]
 ```
 
-## Get Pre-signed URL for Song
-**Endpoint:** `GET /song`
-**Description:** Generates a pre-signed URL for accessing a specific song file.
-**Input:**
-- Query Parameters:
-  - `path` (string, required): The path to the song file (e.g., "album-name/song.flac")
+## Get Song Details
 
-**Output:** String containing the pre-signed URL
+**Endpoint:** `GET /api/songs/:id`
+**Description:** Retrieves detailed information about a specific song including a pre-signed URL for streaming.
+**Input:**
+- URL Parameters:
+  - `id` (number, required): The ID of the song
+**Output:** SongResponse object or 404 if not found
 ```json
-"https://cloudflare-r2-pre-signed-url.com/your-bucket/album-name/song.flac?signature=..."
+{
+  "id": 1,
+  "title": "Song Title",
+  "artistId": 1,
+  "artistName": "Artist Name",
+  "albumId": 1,
+  "albumName": "Album Name",
+  "duration": 240.5,
+  "trackNumber": 1,
+  "url": "https://cloudflare-r2-pre-signed-url.com/your-bucket/path/to/song.flac?signature=..."
+}
 ```
 
 ## Get Album Details
-**Endpoint:** `GET /album/:name`
-**Description:** Retrieves detailed information about a specific album.
+
+**Endpoint:** `GET /api/albums/:id`
+**Description:** Retrieves detailed information about a specific album including songs and artists.
 **Input:**
 - URL Parameters:
-  - `name` (string, required): The name of the album
-
-**Output:** Single Album object or null if not found
+  - `id` (number, required): The ID of the album
+**Output:** AlbumResponse object or 404 if not found
 ```json
 {
+  "id": 1,
   "name": "Album Name",
   "coverUrl": "https://pre-signed-url-to-cover-image.jpg",
   "songs": [
     {
-      "id": "album-name/song.flac",
+      "id": 1,
       "title": "Song Title",
-      "artist": "Artist Name",
-      "album": "Album Name",
+      "artistId": 1,
+      "artistName": "Artist Name",
+      "albumId": 1,
+      "albumName": "Album Name",
       "duration": 240.5,
-      "path": "album-name/song.flac"
+      "trackNumber": 1,
+      "url": "https://cloudflare-r2-pre-signed-url.com/your-bucket/path/to/song.flac?signature=..."
+    }
+  ],
+  "artists": [
+    {
+      "id": 1,
+      "name": "Artist Name"
     }
   ]
 }
 ```
 
 ## Get Artist Details
-**Endpoint:** `GET /artist/:name`
-**Description:** Retrieves detailed information about a specific artist.
+
+**Endpoint:** `GET /api/artists/:id`
+**Description:** Retrieves detailed information about a specific artist including albums and songs.
 **Input:**
 - URL Parameters:
-  - `name` (string, required): The name of the artist
-
-**Output:** Single Artist object or null if not found
+  - `id` (number, required): The ID of the artist
+**Output:** ArtistResponse object or 404 if not found
 ```json
 {
+  "id": 1,
   "name": "Artist Name",
-  "albums": ["Album Name 1", "Album Name 2"],
+  "imageUrl": "https://pre-signed-url-to-artist-image.jpg",
+  "biography": "Artist biography text",
+  "albums": [
+    {
+      "id": 1,
+      "name": "Album Name",
+      "coverUrl": "https://pre-signed-url-to-cover-image.jpg"
+    }
+  ],
   "songs": [
     {
-      "id": "album-name/song.flac",
+      "id": 1,
       "title": "Song Title",
-      "artist": "Artist Name",
-      "album": "Album Name",
+      "artistId": 1,
+      "artistName": "Artist Name",
+      "albumId": 1,
+      "albumName": "Album Name",
       "duration": 240.5,
-      "path": "album-name/song.flac"
+      "trackNumber": 1
     }
   ]
 }
 ```
 
----
-
 Note: 
+- All endpoints are prefixed with `/api`
 - All endpoints return promises and are asynchronous
 - URLs are pre-signed and valid for 1 hour (3600 seconds)
 - Duration is in seconds
 - File paths use forward slashes and are relative to the bucket root
 - All audio files are in FLAC format
-- If an album or artist is not found, the endpoint returns null
+- If an object is not found, the endpoint returns a 404 status code
+- The API uses PostgreSQL for metadata storage and R2 only for media content retrieval

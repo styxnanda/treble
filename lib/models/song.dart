@@ -1,29 +1,37 @@
 class Song {
-  final String id;
+  final int id;
   final String title;
-  final String artist;
-  final String album;
+  final int artistId;
+  final String artistName;
+  final int albumId;
+  final String albumName;
   final double duration;
-  final String path;
+  final int trackNumber;
+  final String? url;
 
   Song({
     required this.id,
     required this.title,
-    required this.artist,
-    required this.album,
+    required this.artistId,
+    required this.artistName,
+    required this.albumId,
+    required this.albumName,
     required this.duration,
-    required this.path,
+    required this.trackNumber,
+    this.url,
   });
 
-  // Factory constructor to create a Song from JSON
   factory Song.fromJson(Map<String, dynamic> json) {
     return Song(
-      id: json['id'] ?? '',
-      title: json['title'] ?? 'Unknown Title',
-      artist: json['artist'] ?? 'Unknown Artist',
-      album: json['album'] ?? 'Unknown Album',
+      id: json['id'] as int? ?? 0,
+      title: json['title'] as String? ?? '',
+      artistId: json['artistId'] as int? ?? 0,
+      artistName: json['artistName'] as String? ?? '',
+      albumId: json['albumId'] as int? ?? 0,
+      albumName: json['albumName'] as String? ?? '',
       duration: (json['duration'] as num?)?.toDouble() ?? 0.0,
-      path: json['path'] ?? '',
+      trackNumber: json['trackNumber'] as int? ?? 0,
+      url: json['url'] as String?,
     );
   }
 
@@ -31,15 +39,18 @@ class Song {
     return {
       'id': id,
       'title': title,
-      'artist': artist,
-      'album': album,
+      'artistId': artistId,
+      'artistName': artistName,
+      'albumId': albumId,
+      'albumName': albumName,
       'duration': duration,
-      'path': path,
+      'trackNumber': trackNumber,
+      if (url != null) 'url': url,
     };
   }
 
   @override
-  String toString() => '$title by $artist from $album';
+  String toString() => '$title by $artistName from $albumName';
 
   @override
   bool operator ==(Object other) {

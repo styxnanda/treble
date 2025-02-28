@@ -36,7 +36,7 @@ class AlbumCard extends StatelessWidget {
                       height: size,
                       color: Colors.grey[800],
                       child: const Center(
-                        child: Icon(Icons.album, size: 50, color: Colors.white30),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                     ),
                     errorWidget: (context, url, error) => Container(
@@ -70,18 +70,6 @@ class AlbumCard extends StatelessWidget {
               style: const TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
-              ),
-            ),
-          ),
-          
-          // Track count
-          SizedBox(
-            width: size,
-            child: Text(
-              '${album.songs.length} tracks',
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 11,
               ),
             ),
           ),

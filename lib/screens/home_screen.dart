@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:treble/main.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../models/song.dart';
 import '../providers/song_provider.dart';
@@ -22,7 +23,7 @@ class HomeScreen extends ConsumerWidget {
     return TrebleScaffold(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Treble'),
+          title: Text('Treble', style: GoogleFonts.leckerliOne()),
           actions: [
             IconButton(
               icon: const Icon(Icons.search),
@@ -71,7 +72,7 @@ class HomeScreen extends ConsumerWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => AlbumScreen(albumName: album.name),
+                                      builder: (_) => AlbumScreen(albumId: album.id),
                                     ),
                                   );
                                 },
@@ -106,12 +107,10 @@ class HomeScreen extends ConsumerWidget {
                           return SongTile(
                             song: song,
                             onTap: () {
-                              ref.read(playSongProvider(
-                                PlayRequest(
-                                  song: song,
-                                  songs: songsList,
-                                ),
-                              ));
+                              ref.read(playSongProvider(PlayRequest(
+                                song: song,
+                                songs: songsList,
+                              )));
                             },
                           );
                         },

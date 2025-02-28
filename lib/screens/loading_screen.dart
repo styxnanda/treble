@@ -99,7 +99,7 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> with SingleTicker
           children: [
             Text(
               'Treble',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.leckerliOne(
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,

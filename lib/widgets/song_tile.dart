@@ -29,40 +29,39 @@ class SongTile extends ConsumerWidget {
       orElse: () => false,
     );
     
-    final isPlaying = playbackState.maybeWhen(
-      data: (state) => state.playing,
-      orElse: () => false,
-    );
-    
     return ListTile(
-      leading: _buildLeading(context, ref, isCurrentSong, isPlaying),
+      onTap: onTap,
+      selected: isCurrentSong,
+      selectedTileColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+      leading: _buildLeading(context, ref, isCurrentSong),
       title: Text(
         song.title,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: isCurrentSong 
-            ? TextStyle(color: Theme.of(context).colorScheme.primary)
-            : null,
       ),
       subtitle: Text(
-        '${song.artist} • ${song.album}',
+        '${song.artistName} • ${song.albumName}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
       trailing: _buildTrailing(context, ref),
-      onTap: () {
-        if (onTap != null) {
-          onTap!();
-        } else {
-          // Default behavior: play this song
-          ref.read(playSongProvider(PlayRequest(song: song)));
-        }
-      },
     );
   }
   
-  Widget _buildLeading(BuildContext context, WidgetRef ref, bool isCurrentSong, bool isPlaying) {
-    final albumCoverUrl = ref.watch(albumCoverUrlProvider(song.album));
+  Widget _buildLeading(BuildContext context, WidgetRef ref, bool isCurrentSong) {
+    if (showTrackNumber) {
+      return SizedBox(
+        width: 32,
+        child: Center(
+          child: Text(
+            song.trackNumber.toString(),
+            style: TextStyle(
+              color: isCurrentSong ? Theme.of(context).colorScheme.primary : Colors.white54,
+            ),
+          ),
+        ),
+      );
+    }
     
     return Container(
       width: 50,
@@ -73,22 +72,20 @@ class SongTile extends ConsumerWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(4.0),
-        child: albumCoverUrl.when(
+        child: ref.watch(albumCoverUrlProvider(song.albumId)).when(
           data: (url) => url.isEmpty
             ? Icon(
                 Icons.music_note,
                 color: isCurrentSong ? Theme.of(context).colorScheme.primary : Colors.white54,
               )
-            : url.startsWith('http')
-              ? Image.network(
-                  url,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.music_note,
-                    color: isCurrentSong ? Theme.of(context).colorScheme.primary : Colors.white54,
-                  ),
-                )
-              : Image.asset(url, fit: BoxFit.cover),
+            : Image.network(
+                url,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  Icons.music_note,
+                  color: isCurrentSong ? Theme.of(context).colorScheme.primary : Colors.white54,
+                ),
+              ),
           loading: () => const Center(
             child: SizedBox(
               width: 20,
@@ -126,11 +123,10 @@ class SongTile extends ConsumerWidget {
                 break;
                 
               case 'view_album':
-                // Navigate to album screen using original album name from song
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => AlbumScreen(albumName: song.album),
+                    builder: (_) => AlbumScreen(albumId: song.albumId),
                   ),
                 );
                 break;
@@ -139,7 +135,7 @@ class SongTile extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ArtistScreen(artistName: song.artist),
+                    builder: (_) => ArtistScreen(artistId: song.artistId),
                   ),
                 );
                 break;
@@ -179,7 +175,7 @@ class SongTile extends ConsumerWidget {
   String _formatDuration(double seconds) {
     final duration = Duration(seconds: seconds.round());
     final minutes = duration.inMinutes;
-    final remainingSeconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-    return '$minutes:$remainingSeconds';
+    final remainingSeconds = duration.inSeconds - minutes * 60;
+    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 }

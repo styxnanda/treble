@@ -29,8 +29,6 @@ class PlayerScreen extends ConsumerWidget {
             return const Center(child: Text('No song is currently playing'));
           }
           
-          final albumCoverUrl = ref.watch(albumCoverUrlProvider(song.album));
-          
           return Column(
             children: [
               // Expanded album art and song info
@@ -63,26 +61,17 @@ class PlayerScreen extends ConsumerWidget {
                             color: Colors.grey[800],
                           ),
                           clipBehavior: Clip.antiAlias,
-                          child: albumCoverUrl.when(
+                          child: ref.watch(albumCoverUrlProvider(song.albumId)).when(
                             data: (url) => url.isEmpty
-                              ? const Center(
-                                  child: Icon(Icons.music_note, size: 80, color: Colors.white54),
-                                )
-                              : url.startsWith('http')
-                                ? Image.network(
-                                    url,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => const Center(
-                                      child: Icon(Icons.music_note, size: 80, color: Colors.white54),
-                                    ),
-                                  )
-                                : Image.asset(url, fit: BoxFit.cover),
-                            loading: () => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                            error: (_, __) => const Center(
-                              child: Icon(Icons.music_note, size: 80, color: Colors.white54),
-                            ),
+                              ? const Icon(Icons.music_note, size: 80, color: Colors.white54)
+                              : Image.network(
+                                  url,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => 
+                                    const Icon(Icons.music_note, size: 80, color: Colors.white54),
+                                ),
+                            loading: () => const Center(child: CircularProgressIndicator()),
+                            error: (_, __) => const Icon(Icons.music_note, size: 80, color: Colors.white54),
                           ),
                         ),
                       ),
@@ -109,7 +98,7 @@ class PlayerScreen extends ConsumerWidget {
                             
                             // Artist name
                             Text(
-                              song.artist,
+                              song.artistName,
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 color: Colors.grey[400],
                               ),
@@ -122,7 +111,7 @@ class PlayerScreen extends ConsumerWidget {
                             
                             // Album name
                             Text(
-                              song.album,
+                              song.albumName,
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Colors.grey[600],
                               ),

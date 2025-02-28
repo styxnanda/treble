@@ -96,9 +96,9 @@ final playSongProvider = Provider.family<Future<void>, PlayRequest>((ref, reques
     return;
   }
   
-  // If we have an album name
-  if (request.albumName != null) {
-    final albumAsync = ref.read(albumProvider(request.albumName!));
+  // If we have an album ID
+  if (request.albumId != null) {
+    final albumAsync = ref.read(albumProvider(request.albumId!));
     
     return albumAsync.when(
       data: (album) async {
@@ -133,14 +133,14 @@ final playSongProvider = Provider.family<Future<void>, PlayRequest>((ref, reques
 class PlayRequest {
   final Song? song;
   final List<Song>? songs;
-  final String? albumName;  // Changed from albumId to albumName
+  final int? albumId;  // Changed from albumName to albumId
   final int? initialIndex;
   final bool autoPlay;
   
   PlayRequest({
     this.song,
     this.songs,
-    this.albumName,  // Changed from albumId to albumName
+    this.albumId,  // Changed from albumName to albumId
     this.initialIndex,
     this.autoPlay = true,
   });

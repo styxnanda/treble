@@ -26,7 +26,14 @@ class MusicApiService {
       
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        return data.map((songData) => Song.fromJson(songData)).toList();
+        return Future.wait(
+          data.map((songData) async {
+            // Get detailed song data including URL
+            final song = Song.fromJson(songData);
+            final details = await fetchSongDetails(song.id);
+            return details ?? song;
+          })
+        );
       } else {
         throw Exception('Failed to fetch songs: ${response.statusCode}');
       }
@@ -44,7 +51,14 @@ class MusicApiService {
       
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        return data.map((albumData) => Album.fromJson(albumData)).toList();
+        return Future.wait(
+          data.map((albumData) async {
+            // Get detailed album data including cover URL and songs
+            final album = Album.fromJson(albumData);
+            final details = await fetchAlbumDetails(album.id);
+            return details ?? album;
+          })
+        );
       } else {
         throw Exception('Failed to fetch albums: ${response.statusCode}');
       }
@@ -74,12 +88,28 @@ class MusicApiService {
     }
   }
   
-  Future<Album?> fetchAlbumDetails(String name) async {
+  Future<Song?> fetchSongDetails(int id) async {
     try {
-      final response = await _dio.get('$baseUrl/album/$name');
+      final response = await _dio.get('$baseUrl/songs/$id');
       
       if (response.statusCode == 200) {
-        if (response.data == null) return null;
+        return Song.fromJson(response.data);
+      } else {
+        throw Exception('Failed to fetch song details: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching song details: $e');
+      }
+      return null;
+    }
+  }
+  
+  Future<Album?> fetchAlbumDetails(int id) async {
+    try {
+      final response = await _dio.get('$baseUrl/albums/$id');
+
+      if (response.statusCode == 200) {
         return Album.fromJson(response.data);
       } else {
         throw Exception('Failed to fetch album details: ${response.statusCode}');
@@ -92,12 +122,11 @@ class MusicApiService {
     }
   }
   
-  Future<Artist?> fetchArtistDetails(String name) async {
+  Future<Artist?> fetchArtistDetails(int id) async {
     try {
-      final response = await _dio.get('$baseUrl/artist/$name');
+      final response = await _dio.get('$baseUrl/artists/$id');
       
       if (response.statusCode == 200) {
-        if (response.data == null) return null;
         return Artist.fromJson(response.data);
       } else {
         throw Exception('Failed to fetch artist details: ${response.statusCode}');
@@ -105,31 +134,6 @@ class MusicApiService {
     } catch (e) {
       if (kDebugMode) {
         print('Error fetching artist details: $e');
-      }
-      return null;
-    }
-  }
-  
-  Future<String?> getSongStreamUrl(String songPath) async {
-    try {
-      // Encode the path to make it URL-safe
-      final encodedPath = Uri.encodeComponent(songPath);
-      final response = await _dio.get('$baseUrl/song/$encodedPath');
-      
-      if (response.statusCode == 200) {
-        // Extract the URL from the response data
-        final responseData = response.data;
-        if (responseData is Map && responseData.containsKey('url')) {
-          return responseData['url'] as String;
-        } else {
-          throw Exception('Invalid response format: URL field not found');
-        }
-      } else {
-        throw Exception('Failed to get song URL: ${response.statusCode}');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error getting song URL: $e');
       }
       return null;
     }

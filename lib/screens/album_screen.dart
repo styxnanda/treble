@@ -10,16 +10,16 @@ import '../widgets/song_tile.dart';
 import '../main.dart';
 
 class AlbumScreen extends ConsumerWidget {
-  final String albumName;
+  final int albumId;
 
   const AlbumScreen({
     Key? key,
-    required this.albumName,
+    required this.albumId,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final albumAsync = ref.watch(albumProvider(albumName));
+    final albumAsync = ref.watch(albumProvider(albumId));
 
     return TrebleScaffold(
       child: Scaffold(
@@ -101,10 +101,13 @@ class AlbumScreen extends ConsumerWidget {
           icon: const Icon(Icons.play_circle_filled),
           tooltip: 'Play album',
           onPressed: () {
-            ref.read(playSongProvider(PlayRequest(
-              albumName: albumName,
-              autoPlay: true,
-            )));
+            if (album.songs.isNotEmpty) {
+              ref.read(playSongProvider(PlayRequest(
+                song: album.songs[0],
+                songs: album.songs,
+                autoPlay: true,
+              )));
+            }
           },
         ),
         IconButton(

@@ -87,7 +87,6 @@ class TrebleScaffold extends ConsumerWidget {
   Widget _buildMiniPlayer(BuildContext context, WidgetRef ref, Song song) {
     final playbackState = ref.watch(playbackStateProvider);
     final audioService = ref.watch(audioServiceProvider);
-    final albumCoverUrl = ref.watch(albumCoverUrlProvider(song.album));
     
     return GestureDetector(
       onTap: () => _openPlayerScreen(context),
@@ -112,28 +111,17 @@ class TrebleScaffold extends ConsumerWidget {
               child: SizedBox(
                 width: 60,
                 height: 60,
-                child: albumCoverUrl.when(
+                child: ref.watch(albumCoverUrlProvider(song.albumId)).when(
                   data: (url) => url.isEmpty
                     ? const Icon(Icons.music_note, color: Colors.white54)
-                    : url.startsWith('http')
-                      ? Image.network(
-                          url,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => 
-                            Image.asset('assets/images/default_cover.png', fit: BoxFit.cover),
-                        )
-                      : Image.asset(url, fit: BoxFit.cover),
-                  loading: () => const Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
-                  error: (_, __) => Image.asset(
-                    'assets/images/default_cover.png',
-                    fit: BoxFit.cover,
-                  ),
+                    : Image.network(
+                        url,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => 
+                          const Icon(Icons.music_note, color: Colors.white54),
+                      ),
+                  loading: () => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  error: (_, __) => const Icon(Icons.music_note, color: Colors.white54),
                 ),
               ),
             ),
@@ -155,7 +143,7 @@ class TrebleScaffold extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      '${song.artist} • ${song.album}',
+                      '${song.artistName} • ${song.albumName}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
