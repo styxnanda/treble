@@ -1,4 +1,4 @@
-package com.example.treble
+package com.satyaand.treble
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,6 +1,6 @@
 class AppConstants {
   // API configuration
-  static const String apiBaseUrl = 'http://localhost:7000/api';
+  static const String apiBaseUrl = 'https://treble-api.vercel.app/api';
   
   // App theme
   static const double defaultPadding = 16.0;
