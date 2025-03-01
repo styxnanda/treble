@@ -1,6 +1,6 @@
 class AppConstants {
   // API configuration
-  static const String apiBaseUrl = 'https://treble-api.vercel.app/api';
+  static const String apiBaseUrl = 'https://trebapi.satyaand.com/api';
   
   // App theme
   static const double defaultPadding = 16.0;
